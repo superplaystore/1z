@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Play Store</title>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f1f3f4;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --blue-600: #2563EB;
+            --accent-color: var(--blue-600);
+            --header-height: 60px;
+            --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --badge-blue: var(--blue-600);
+            --badge-orange: #f57c00;
+            --grid-gap: 4px;
+            --main-spacing: 6px;
+            --fallback-bg: #f1f3f4;
+            --category-active-color: var(--blue-600);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none !important;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: var(--primary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 2000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-width: 50px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border-radius: 50%;
+        }
+
+        .logo-icon:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-icon img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .header-center {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 100%;
+            margin: 0 10px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 50px;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:active {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-sub);
+            transition: fill 0.2s ease;
+        }
+
+        main {
+            width: 100%;
+            padding-left: 8px;
+            padding-right: 1px;
+            margin: 0;
+            padding-top: calc(var(--header-height) + 48px);
+        }
+
+        .category-tabs-container {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            background-color: var(--primary-bg);
+            z-index: 1999;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding: 0 16px;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+            background-color: var(--primary-bg);
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-tab {
+            padding: 12px 8px 10px 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+            letter-spacing: 0.3px;
+        }
+
+        .category-tab.active {
+            color: var(--category-active-color);
+            font-weight: 600;
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background-color: var(--category-active-color);
+            border-radius: 3px 3px 0 0;
+            transition: left 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1), width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            will-change: left, width;
+        }
+
+        #no-results {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-sub);
+            font-size: 1rem;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            justify-content: start;
+            gap: 10px 5px;
+            margin-bottom: 20px;
+        }
+
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            height: fit-content;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-item:active {
+            opacity: 0.6;
+        }
+
+        .app-icon-large {
+            width: 110px;
+            height: 110px;
+            background-color: var(--secondary-bg);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            border: 1px solid var(--text-sub);
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .app-icon-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 22px;
+            display: block;
+            pointer-events: none;
+        }
+
+        .app-name {
+            width: 110px;
+            max-width: 110px;
+            margin-top: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.2;
+            text-align: left;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        .app-rating {
+            width: 110px;
+            max-width: 110px;
+            margin-top: 3px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            line-height: 1.2;
+            text-align: left;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        .see-more-container {
+            text-align: center;
+            margin: 20px 0 30px;
+        }
+
+        .see-more-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .see-more-btn:active {
+            opacity: 0.8;
+        }
+
+        .see-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loader-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--secondary-bg);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #scroll-sentinel {
+            height: 1px;
+            width: 100%;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-indicator-container {
+            text-align: center;
+            padding: 16px 0 30px 0;
+            display: none;
+        }
+
+        .loading-indicator-container.active {
+            display: block;
+        }
+
+        .loading-indicator-container .loader-spinner {
+            width: 28px;
+            height: 28px;
+            border-width: 3px;
+        }
+
+        .loading-indicator-container .loading-text {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .app-icon-large {
+                width: 110px;
+                height: 110px;
+                border-radius: 15px;
+            }
+            .app-name,
+            .app-rating {
+                width: 110px;
+                max-width: 110px;
+            }
+            .app-grid {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 8px 4px;
+            }
+            .category-tab {
+                font-size: 0.85rem;
+                padding: 10px 6px 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="header-left">
+            <div class="logo-icon" onclick="goHome()"><img src="Play Logo.png" alt="Play Store" /></div>
+        </div>
+        <div class="header-center">
+            <div class="header-title-container">
+                <div class="header-title" onclick="goHome()">Play Store</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="category-tabs-container" id="categoryTabsContainer">
+        <div class="category-tabs" id="categoryTabs">
+            <div class="tab-indicator" id="tabIndicator"></div>
+        </div>
+    </div>
+
+    <main id="main-content">
+        <div id="no-results">No apps found</div>
+        <section id="content-section">
+            <div class="app-grid" id="app-container"></div>
+            <div id="scroll-sentinel"></div>
+            <div class="loading-indicator-container" id="loadingIndicator">
+                <div class="loader-spinner"></div>
+                <div class="loading-text">Loading more apps…</div>
+            </div>
+            <div id="see-more-container" class="see-more-container"></div>
+        </section>
+    </main>
+
+    <script type="module">
+        // ✅ NEW Firebase config (v12.18.0) — all old config removed
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            query,
+            where,
+            limit,
+            startAfter,
+            orderBy
+        } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDX4L1S3pZtFAoY28HDhCwv8Jp0BMrddb4",
+            authDomain: "app-deta-9107e.firebaseapp.com",
+            databaseURL: "https://app-deta-9107e-default-rtdb.firebaseio.com",
+            projectId: "app-deta-9107e",
+            storageBucket: "app-deta-9107e.firebasestorage.app",
+            messagingSenderId: "296341180391",
+            appId: "1:296341180391:web:685b22b3123f60b1eb3742",
+            measurementId: "G-3EDVBFD5J6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --------------------- EXISTING LOGIC (unchanged) ---------------------
+        const FALLBACK_IMAGE =
+            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23cccccc"/%3E%3Ctext x="50" y="50" font-size="18" text-anchor="middle" dy=".3em" fill="%23666"%3E?%3C/text%3E%3C/svg%3E';
+
+        const state = {
+            allApps: [],
+            currentCategory: 'all',
+            displayLimit: 10,
+            isLoading: false,
+            categories: [],
+        };
+
+        const pagination = {
+            lastVisibleDoc: null,
+            hasMoreApps: true,
+            isLoading: false,
+            initialLoadDone: false,
+            loadedIds: new Set(),
+        };
+
+        const container = document.getElementById('app-container');
+        const noResults = document.getElementById('no-results');
+        const seeMoreContainer = document.getElementById('see-more-container');
+        const categoryTabsEl = document.getElementById('categoryTabs');
+        const indicator = document.getElementById('tabIndicator');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const sentinelEl = document.getElementById('scroll-sentinel');
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function getCategoryDisplayName(cat) {
+            if (cat === 'all') return 'All';
+            if (cat === 'favourite') return 'Favourite';
+            const found = state.categories.find(c => c.toLowerCase() === cat.toLowerCase());
+            return found || cat;
+        }
+
+        async function loadCategoriesFromFirestore() {
+            try {
+                const snapshot = await getDocs(collection(db, "category"));
+                const categorySet = new Set();
+                const loaded = [];
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const name = data.categoryName ? String(data.categoryName).trim() : '';
+                    if (name === '') return;
+                    const lower = name.toLowerCase();
+                    if (!categorySet.has(lower)) {
+                        categorySet.add(lower);
+                        loaded.push(name);
+                    }
+                });
+                state.categories = loaded;
+            } catch (error) {
+                console.error('Failed to load categories from Firestore:', error);
+                state.categories = [];
+            }
+        }
+
+        function buildCategoryFilters() {
+            while (categoryTabsEl.firstChild) {
+                if (categoryTabsEl.firstChild.id === 'tabIndicator') break;
+                categoryTabsEl.removeChild(categoryTabsEl.firstChild);
+            }
+
+            const allTab = document.createElement('button');
+            allTab.className = 'category-tab' + (state.currentCategory === 'all' ? ' active' : '');
+            allTab.dataset.category = 'all';
+            allTab.textContent = 'All';
+            allTab.addEventListener('click', () => {
+                if (state.currentCategory === 'all') return;
+                onCategorySelect('all');
+            });
+            categoryTabsEl.insertBefore(allTab, indicator);
+
+            const favTab = document.createElement('button');
+            favTab.className = 'category-tab' + (state.currentCategory === 'favourite' ? ' active' : '');
+            favTab.dataset.category = 'favourite';
+            favTab.textContent = 'Favourite';
+            favTab.addEventListener('click', () => {
+                if (state.currentCategory === 'favourite') return;
+                onCategorySelect('favourite');
+            });
+            categoryTabsEl.insertBefore(favTab, indicator);
+
+            state.categories.forEach((catName) => {
+                const normalized = catName.trim().toLowerCase();
+                if (!normalized) return;
+                const tab = document.createElement('button');
+                const isActive = (state.currentCategory === normalized);
+                tab.className = 'category-tab' + (isActive ? ' active' : '');
+                tab.dataset.category = normalized;
+                tab.textContent = catName;
+                tab.addEventListener('click', () => {
+                    if (state.currentCategory === normalized) return;
+                    onCategorySelect(normalized);
+                });
+                categoryTabsEl.insertBefore(tab, indicator);
+            });
+
+            updateActiveTabAndIndicator();
+        }
+
+        function updateActiveTabAndIndicator() {
+            const tabs = categoryTabsEl.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                const cat = tab.dataset.category;
+                let isActive = false;
+                if (cat === 'all' || cat === 'favourite') {
+                    isActive = (state.currentCategory === cat);
+                } else {
+                    isActive = (state.currentCategory === cat.toLowerCase());
+                }
+                tab.classList.toggle('active', isActive);
+            });
+            updateIndicator();
+        }
+
+        function updateIndicator() {
+            const activeTab = categoryTabsEl.querySelector('.category-tab.active');
+            if (!activeTab) return;
+            const tabRect = activeTab.getBoundingClientRect();
+            const containerRect = categoryTabsEl.getBoundingClientRect();
+            const left = tabRect.left - containerRect.left;
+            indicator.style.left = `${left}px`;
+            indicator.style.width = `${tabRect.width}px`;
+        }
+
+        function filterAppsByCategory(apps, category) {
+            if (category === 'all') return apps;
+            if (category === 'favourite') {
+                try {
+                    const savedAppsData = localStorage.getItem('Save_apps');
+                    if (savedAppsData) {
+                        const parsed = JSON.parse(savedAppsData);
+                        if (parsed && Array.isArray(parsed.apps)) {
+                            const savedIds = new Set(parsed.apps);
+                            return apps.filter(app => savedIds.has(app.id));
+                        }
+                    }
+                    return [];
+                } catch (e) {
+                    console.error('Error parsing Save_apps:', e);
+                    return [];
+                }
+            }
+            const normalizedCat = category.toLowerCase();
+            return apps.filter(app =>
+                app.category && app.category.trim().toLowerCase() === normalizedCat
+            );
+        }
+
+        function getDisplayApps() {
+            return filterAppsByCategory(state.allApps, state.currentCategory);
+        }
+
+        async function loadInitialApps() {
+            if (pagination.isLoading) return;
+            pagination.isLoading = true;
+            pagination.initialLoadDone = false;
+            showLoadingIndicator(true);
+
+            try {
+                const q = query(
+                    collection(db, "store"),
+                    orderBy("appName"),
+                    limit(10)
+                );
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    pagination.hasMoreApps = false;
+                    state.allApps = [];
+                    pagination.initialLoadDone = true;
+                    renderAppsGrid();
+                    showLoadingIndicator(false);
+                    return;
+                }
+
+                const apps = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.appName ? String(data.appName).trim() : "Unnamed App",
+                        icon: data.logoUrl ? String(data.logoUrl).trim() : FALLBACK_IMAGE,
+                        rating: data.rating !== undefined ? Number(data.rating) : 0,
+                        category: data.category ? String(data.category).trim() : ''
+                    };
+                });
+
+                state.allApps = apps;
+                apps.forEach(a => pagination.loadedIds.add(a.id));
+                pagination.lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+                pagination.hasMoreApps = snapshot.docs.length === 10;
+                pagination.initialLoadDone = true;
+
+                state.displayLimit = 10;
+                renderAppsGrid();
+                showLoadingIndicator(false);
+
+                const filtered = filterAppsByCategory(state.allApps, state.currentCategory);
+                if (filtered.length === 0 && pagination.hasMoreApps) {
+                    await loadMoreAppsUntilCategoryHasMatches(state.currentCategory);
+                }
+
+            } catch (error) {
+                console.error("Failed to load initial apps:", error);
+                noResults.textContent = 'Failed to load apps';
+                noResults.style.display = 'block';
+                pagination.initialLoadDone = true;
+                showLoadingIndicator(false);
+            } finally {
+                pagination.isLoading = false;
+            }
+        }
+
+        async function loadMoreApps() {
+            if (pagination.isLoading) return;
+            if (!pagination.hasMoreApps) return;
+            if (!pagination.initialLoadDone) return;
+            if (!pagination.lastVisibleDoc) return;
+
+            pagination.isLoading = true;
+            showLoadingIndicator(true);
+
+            try {
+                const q = query(
+                    collection(db, "store"),
+                    orderBy("appName"),
+                    startAfter(pagination.lastVisibleDoc),
+                    limit(5)
+                );
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    pagination.hasMoreApps = false;
+                    showLoadingIndicator(false);
+                    renderAppsGrid();
+                    return;
+                }
+
+                const newApps = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.appName ? String(data.appName).trim() : "Unnamed App",
+                        icon: data.logoUrl ? String(data.logoUrl).trim() : FALLBACK_IMAGE,
+                        rating: data.rating !== undefined ? Number(data.rating) : 0,
+                        category: data.category ? String(data.category).trim() : ''
+                    };
+                });
+
+                const uniqueNewApps = newApps.filter(a => !pagination.loadedIds.has(a.id));
+                if (uniqueNewApps.length > 0) {
+                    state.allApps = [...state.allApps, ...uniqueNewApps];
+                    uniqueNewApps.forEach(a => pagination.loadedIds.add(a.id));
+                }
+
+                pagination.lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+                pagination.hasMoreApps = snapshot.docs.length === 5;
+
+                renderAppsGrid();
+                showLoadingIndicator(false);
+
+                const filtered = filterAppsByCategory(state.allApps, state.currentCategory);
+                if (filtered.length === 0 && pagination.hasMoreApps && !pagination.isLoading) {
+                    await loadMoreAppsUntilCategoryHasMatches(state.currentCategory);
+                }
+
+            } catch (error) {
+                console.error("Failed to load more apps:", error);
+                showLoadingIndicator(false);
+            } finally {
+                pagination.isLoading = false;
+            }
+        }
+
+        async function loadMoreAppsUntilCategoryHasMatches(category) {
+            let filtered = filterAppsByCategory(state.allApps, category);
+            if (filtered.length > 0) return;
+            if (!pagination.hasMoreApps) return;
+
+            let attempts = 0;
+            const MAX_ATTEMPTS = 20;
+
+            while (filtered.length === 0 && pagination.hasMoreApps && !pagination.isLoading && attempts < MAX_ATTEMPTS) {
+                await loadMoreApps();
+                filtered = filterAppsByCategory(state.allApps, category);
+                attempts++;
+            }
+
+            renderAppsGrid();
+        }
+
+        function showLoadingIndicator(show) {
+            if (show) {
+                loadingIndicator.classList.add('active');
+            } else {
+                loadingIndicator.classList.remove('active');
+            }
+        }
+
+        function renderAppsGrid() {
+            const filtered = getDisplayApps();
+            const displayApps = filtered.slice(0, state.displayLimit);
+
+            if (!pagination.initialLoadDone && state.allApps.length === 0) {
+                container.innerHTML = '';
+                noResults.textContent = 'Loading apps...';
+                noResults.style.display = 'block';
+                seeMoreContainer.innerHTML = '';
+                return;
+            }
+
+            if (state.allApps.length === 0 && pagination.initialLoadDone) {
+                container.innerHTML = '';
+                noResults.textContent = 'No apps found';
+                noResults.style.display = 'block';
+                seeMoreContainer.innerHTML = '';
+                return;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                const categoryDisplay = getCategoryDisplayName(state.currentCategory);
+                noResults.textContent = `No apps in "${categoryDisplay}" category yet. Loading more…`;
+                noResults.style.display = 'block';
+                seeMoreContainer.innerHTML = '';
+                if (pagination.hasMoreApps && !pagination.isLoading) {
+                    loadMoreAppsUntilCategoryHasMatches(state.currentCategory);
+                }
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            container.innerHTML = displayApps.map(app => {
+                const rating = (app.rating !== undefined && app.rating !== null) ? Number(app.rating) : 0;
+                const ratingStr = rating.toFixed(1);
+                return `<div class="app-item" data-app-id="${escapeHtml(app.id)}">
+                            <div class="app-icon-large">
+                                <img src="${escapeHtml(app.icon || FALLBACK_IMAGE)}" alt="${escapeHtml(app.name)}" onerror="this.src='${FALLBACK_IMAGE}'" loading="lazy">
+                            </div>
+                            <div class="app-name">${escapeHtml(app.name)}</div>
+                            <div class="app-rating">★ ${escapeHtml(ratingStr)}</div>
+                        </div>`;
+            }).join('');
+
+            const showButton = (state.displayLimit < filtered.length);
+            if (showButton) {
+                seeMoreContainer.innerHTML =
+                    `<button class="see-more-btn" id="seeMoreBtn" onclick="window.handleSeeMore?.()">See More</button>`;
+            } else {
+                seeMoreContainer.innerHTML = '';
+            }
+
+            attachAppItemClickHandlers();
+        }
+
+        function attachAppItemClickHandlers() {
+            document.querySelectorAll('.app-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const appId = this.dataset.appId;
+                    if (!appId) return;
+                    const appIdData = { "Document ID": appId };
+                    localStorage.setItem("App_id", JSON.stringify(appIdData));
+                    window.location.href = 'download_page.html';
+                });
+            });
+        }
+
+        async function onCategorySelect(category) {
+            if (category === state.currentCategory) return;
+
+            state.currentCategory = category;
+            state.displayLimit = 10;
+
+            updateActiveTabAndIndicator();
+
+            const filtered = filterAppsByCategory(state.allApps, category);
+
+            if (filtered.length === 0 && pagination.hasMoreApps && pagination.initialLoadDone) {
+                renderAppsGrid();
+                await loadMoreAppsUntilCategoryHasMatches(category);
+            } else {
+                renderAppsGrid();
+            }
+        }
+
+        function handleSeeMore() {
+            if (state.isLoading) return;
+            state.displayLimit += 10;
+            renderAppsGrid();
+        }
+
+        function goHome() {
+            state.currentCategory = 'all';
+            state.displayLimit = 10;
+            renderAppsGrid();
+            updateActiveTabAndIndicator();
+        }
+
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                const entry = entries[0];
+                if (entry.isIntersecting) {
+                    if (!pagination.isLoading && pagination.hasMoreApps && pagination.initialLoadDone) {
+                        loadMoreApps();
+                    }
+                }
+            }, {
+                rootMargin: '0px 0px 200px 0px',
+                threshold: 0.1,
+            });
+
+            if (sentinelEl) {
+                observer.observe(sentinelEl);
+            }
+            return observer;
+        }
+
+        let observer = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCategoriesFromFirestore();
+            buildCategoryFilters();
+            await loadInitialApps();
+            observer = setupIntersectionObserver();
+
+            window.goHome = goHome;
+            window.handleSeeMore = handleSeeMore;
+
+            window.addEventListener('resize', () => updateIndicator());
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (observer) {
+                observer.disconnect();
+            }
+        });
+    </script>
+</body>
+</html>
