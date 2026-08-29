@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>App Details</title>
+
+    <!-- ✅ Firebase SDK v12.18.0 via importmap -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+            }
+        }
+    </script>
+
+    <style>
+        /* ---------- all existing styles exactly as before ---------- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        } 
+
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fff;
+            color: #202124;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .app-container {
+            width: 100%;
+            margin: 0;
+            padding: 0 16px 48px;
+        }
+
+        .top-nav {
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-btn {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #202124;
+            cursor: pointer;
+            transition: background .15s ease, transform .1s ease;
+            touch-action: manipulation;
+        }
+
+        .nav-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .nav-btn:active {
+            transform: scale(.91);
+            background: #e8eaed;
+        }
+
+        .nav-btn:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: 2px;
+        }
+
+        #menuBtn {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        #menuBtn:hover,
+        #menuBtn:active,
+        #menuBtn:focus,
+        #menuBtn:focus-visible {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        #menuBtn:active {
+            transform: none !important;
+        }
+
+        #bookmarkBtn {
+            background: transparent !important;
+        }
+        #bookmarkBtn:hover,
+        #bookmarkBtn:active {
+            background: transparent !important;
+        }
+
+        .back-button-image {
+            width: 24px;
+            height: 24px;
+            display: block;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .bookmark-icon {
+            width: 22px;
+            height: 27px;
+            display: inline-block;
+            background: transparent;
+        }
+
+        .bookmark-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #202124;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: fill .2s ease, stroke .2s ease;
+            background: transparent;
+        }
+
+        .bookmark-icon.saved svg {
+            fill: #1a73e8;
+            stroke: #1a73e8;
+        }
+
+        .dots {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .top-nav.mobile-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 99;
+            background: #fff;
+        }
+
+        .menu-wrapper {
+            position: relative;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 100px;
+            background: #fff;
+            border: 1px solid #e8eaed;
+            border-radius: 14px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, .16);
+            padding: 6px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity .18s ease, transform .18s ease, visibility 0s .18s;
+            z-index: 100;
+        }
+
+        .dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            transition: opacity .18s ease, transform .18s ease, visibility 0s 0s;
+        }
+
+        .dropdown button {
+            width: 100%;
+            min-height: 44px;
+            border: 0;
+            background: transparent;
+            text-align: left;
+            padding: 10px 18px;
+            color: #202124;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+
+        .dropdown button:hover {
+            background: #f5f5f5;
+        }
+
+        .dropdown button:active {
+            background: #e8eaed;
+        }
+
+        .dropdown button:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: -2px;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 8px 0 18px;
+        }
+
+        .app-icon {
+            width: 82px;
+            height: 82px;
+            flex: 0 0 82px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #f1f3f4;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+            position: relative;
+        }
+
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .app-icon-placeholder,
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #70757a;
+            background: #f1f3f4;
+            font-size: 13px;
+            padding: 10px;
+        }
+
+        .app-info {
+            min-width: 0;
+            padding-top: 2px;
+            flex: 1;
+        }
+
+        .app-name {
+            font-size: 21px;
+            line-height: 1.3;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .category {
+            margin-top: 5px;
+            color: #5f6368;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            width: 100%;
+            min-height: 78px;
+            border-top: none;
+            border-bottom: none;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+
+        .info-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .info-column {
+            flex: 1 0 auto;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8px 5px;
+        }
+
+        .info-divider {
+            width: 1px;
+            background: #dadce0;
+            margin: 16px 0;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        .info-value {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .info-label {
+            margin-top: 3px;
+            color: #5f6368;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .install-wrap {
+            padding: 16px 0;
+        }
+
+        .install-btn {
+            width: 100%;
+            height: 58px;
+            border: 0;
+            border-radius: 30px;
+            background: #d2e3fc;
+            color: #1557b0;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s ease, transform .12s ease;
+            font-family: inherit;
+            touch-action: manipulation;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 12px;
+            line-height: 1.2;
+        }
+
+        .install-btn:hover {
+            background: #c4daf7;
+        }
+
+        .install-btn:active {
+            transform: scale(.97);
+            background: #b7d0f2;
+        }
+
+        .install-btn:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: 3px;
+        }
+
+        .install-btn:disabled {
+            cursor: default;
+            opacity: 0.85;
+            transform: none !important;
+        }
+
+        .install-btn:disabled:hover {
+            background: #d2e3fc;
+        }
+
+        .install-btn:disabled:active {
+            transform: none !important;
+            background: #d2e3fc;
+        }
+
+        .screenshot-section {
+            width: 100%;
+            overflow: visible;
+            margin-top: 4px;
+        }
+
+        .screenshot-scroll {
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 0 14px;
+            scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .screenshot-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .screenshot-card {
+            flex: 0 0 190px;
+            width: 190px;
+            height: 335px;
+            border-radius: 17px;
+            overflow: hidden;
+            background: #f1f3f4;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+            scroll-snap-align: start;
+            position: relative;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .screenshot-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .ratings-section {
+            padding: 12px 0 8px;
+            border-top: none;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            padding-top: 8px;
+        }
+
+        .ratings-title {
+            font-size: 21px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #202124;
+            margin: 0 0 14px 0;
+        }
+
+        .ratings-layout {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .ratings-left {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 80px;
+            padding-right: 8px;
+        }
+
+        .ratings-overall {
+            font-size: 50px;
+            font-weight: 700;
+            line-height: 1;
+            color: #202124;
+            letter-spacing: -0.02em;
+            transform: translateX(20px);
+        }
+
+        .ratings-stars {
+            font-size: 30px;
+            color: #f9ab00;
+            letter-spacing: 2px;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        .ratings-count {
+            font-size: 20px;
+            color: #5f6368;
+            font-weight: 400;
+            margin-top: 2px;
+            line-height: 1.3;
+            transform: translateX(50px);
+        }
+
+        .ratings-right {
+            flex: 1;
+            min-width: 30;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        .rating-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 24px;
+        }
+
+        .rating-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #3c4043;
+            width: 14px;
+            flex-shrink: 0;
+            text-align: right;
+            line-height: 1;
+        }
+
+        .rating-bar-track {
+            flex: 1;
+            height: 8px;
+            background: #e8eaed;
+            border-radius: 20px;
+            overflow: hidden;
+            min-width: 20px;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            border-radius: 20px;
+            background: #f9ab00;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .rating-submit-container {
+            margin-top: 0px;
+            padding-top: 10px;
+            border-top: 0px;
+            display: none;
+        }
+
+        .rating-submit-container.visible {
+            display: block;
+        }
+
+        .rating-submit-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 1;
+            min-width: 0;
+            align-items: center;
+            transform: translateX(-15px);
+        }
+
+        .star-btn {
+            border: 0;
+            background: transparent !important;
+            font-size: 50px;
+            line-height: 1;
+            color: #dadce0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            padding: 0px;
+            font-weight: 400;
+            width: auto;
+            height: auto;
+            min-width: 50px;
+            min-height: 50px;
+            transition: color 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .star-btn:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: 2px;
+        }
+
+        .star-btn:hover {
+            background: transparent !important;
+        }
+
+        .star-btn:active {
+            transform: none !important;
+            background: transparent !important;
+        }
+
+        .star-btn.active {
+            color: #f9ab00;
+        }
+
+        .submit-rating-btn {
+            flex-shrink: 0;
+            min-width: 80px;
+            height: 40px;
+            border: 0;
+            border-radius: 5px;
+            background: #d2e3fc;
+            color: #1557b0;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
+            font-family: inherit;
+            touch-action: manipulation;
+            padding: 0 18px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .submit-rating-btn:enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .submit-rating-btn:enabled:hover {
+            background: #c4daf7;
+        }
+
+        .submit-rating-btn:enabled:active {
+            transform: scale(0.96);
+            background: #b7d0f2;
+        }
+
+        .submit-rating-btn:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: 2px;
+        }
+
+        .about-section {
+            margin-top: 8px;
+        }
+
+        .about-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 28px 0 12px;
+            border-top: none;
+        }
+
+        .about-title {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .about-button {
+            width: 46px;
+            height: 46px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform .12s ease;
+            touch-action: manipulation;
+        }
+
+        .about-button:hover {
+            background: transparent;
+        }
+
+        .about-button:active {
+            transform: scale(.9);
+            background: transparent;
+        }
+
+        .about-button:focus-visible {
+            outline: 2px solid #1a73e8;
+            outline-offset: 2px;
+        }
+
+        .about-button .back-button-image {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+            flex-shrink: 0;
+            transform: scaleX(-1);
+        }
+
+        .about-description {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.3;
+            color: #1e1e1e;
+            padding: 4px 0 8px 0;
+            letter-spacing: -0.01em;
+            word-break: break-word;
+        }
+
+        .data-safety-section {
+            margin-top: 26px;
+            margin-bottom: 8px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .data-safety-title {
+            font-size: 21px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #202124;
+            margin: 0 0 10px;
+        }
+
+        .data-safety-description {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.6;
+            color: #5f6368;
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .about-detail {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height .4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity .35s ease;
+        }
+
+        .about-detail.open {
+            max-height: 1200px;
+            opacity: 1;
+        }
+
+        .about-content {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 10px;
+            margin-top: 8px;
+        }
+
+        .about-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 15px 0 6px;
+            color: #1e1e1e;
+        }
+
+        .about-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .about-content p {
+            color: #3c4043;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .about-content ul {
+            padding-left: 20px;
+            margin: 4px 0 8px;
+        }
+
+        .about-content li {
+            color: #3c4043;
+            font-size: 14px;
+            line-height: 1.65;
+            margin: 4px 0;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 25px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: none;
+            color: #5f6368;
+            font-size: 13px;
+        }
+
+        .meta strong {
+            color: #1e1e1e;
+            font-weight: 600;
+        }
+
+        .screenshot-viewer {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.25s ease, visibility 0s 0.25s;
+        }
+
+        .screenshot-viewer.open {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.25s ease, visibility 0s 0s;
+        }
+
+        .screenshot-viewer-track {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .screenshot-viewer-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .screenshot-viewer-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: center;
+            background: #000;
+            touch-action: pan-y;
+        }
+
+        .screenshot-viewer-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .screenshot-viewer-back {
+            position: absolute;
+            top: calc(env(safe-area-inset-top) + 12px);
+            left: 12px;
+            z-index: 20;
+            width: 46px;
+            height: 46px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+            touch-action: manipulation;
+        }
+
+        .screenshot-viewer-back .back-button-image {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
+        .screenshot-viewer-back.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .screenshot-viewer-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .screenshot-viewer-back:active {
+            transform: scale(0.92);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #323232;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            max-width: 90vw;
+            text-align: center;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0s;
+        }
+
+        .content-error {
+            padding: 60px 20px;
+            text-align: center;
+            color: #5f6368;
+        }
+        .content-error .error-icon {
+            font-size: 48px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+        .content-error .error-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 6px;
+        }
+        .content-error .error-message {
+            font-size: 15px;
+            color: #5f6368;
+            max-width: 320px;
+            margin: 0 auto 16px;
+        }
+        .content-error .error-retry-btn {
+            padding: 10px 28px;
+            border: 0;
+            border-radius: 20px;
+            background: #1a73e8;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.12s ease;
+        }
+        .content-error .error-retry-btn:hover {
+            background: #1557b0;
+        }
+        .content-error .error-retry-btn:active {
+            transform: scale(0.96);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 90%;
+            width: 380px;
+            padding: 24px 28px 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .modal h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #202124;
+        }
+        .modal p {
+            font-size: 15px;
+            color: #5f6368;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal button {
+            padding: 10px 28px;
+            border: 0;
+            border-radius: 20px;
+            background: #1a73e8;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .modal button:hover {
+            background: #1557b0;
+        }
+
+        /* -------- LOADING SCREEN (NEW) -------- */
+        #pageLoader {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 999999;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+        }
+
+        #pageLoader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ✅ LOADING SCREEN — pure white, no content -->
+    <div id="pageLoader" aria-hidden="true"></div>
+
+    <div id="toast" class="toast">Link copied.</div>
+
+    <div class="app-container">
+
+        <!-- ✅ 1. TOP NAV → semantic <header> (was <nav>) -->
+        <header class="top-nav" aria-label="App navigation">
+
+            <button class="nav-btn" id="backBtn" aria-label="Go back">
+                <img src="Back button.png" alt="" class="back-button-image">
+            </button>
+
+            <div class="nav-right">
+
+                <button class="nav-btn" id="bookmarkBtn" aria-label="Save app">
+                    <span class="bookmark-icon" id="bookmarkIcon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </span>
+                </button>
+
+                <div class="menu-wrapper">
+
+                    <button class="nav-btn" id="menuBtn" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+                        <span class="dots" aria-hidden="true">⋮</span>
+                    </button>
+
+                    <div class="dropdown" id="dropdown" role="menu">
+                        <button role="menuitem" data-action="share">Share</button>
+                        <button role="menuitem" data-action="copy">Copy link</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+        <!-- end of <header> (was </nav>) -->
+
+        <!-- ✅ 2. APP HEADER → semantic <div> (was <header>) -->
+        <div class="app-header">
+
+            <div class="app-icon" id="appIcon">
+                <img id="appIconImage" alt="Application icon" />
+            </div>
+
+            <div class="app-info">
+
+                <h1 class="app-name" id="appName"></h1>
+
+                <div class="category" id="category"></div>
+
+            </div>
+
+        </div>
+        <!-- end of <div> (was </header>) -->
+
+        <section class="info-row" aria-label="Application information">
+
+            <div class="info-column">
+                <div class="info-value" id="rating"></div>
+                <div class="info-label" id="reviews"></div>
+            </div>
+
+            <div class="info-divider" role="separator" aria-hidden="true"></div>
+
+            <div class="info-column">
+                <div class="info-value" id="appSize"></div>
+                <div class="info-label">App size</div>
+            </div>
+
+            <div class="info-divider" role="separator" aria-hidden="true"></div>
+
+            <div class="info-column">
+                <div class="info-value" id="downloads"></div>
+                <div class="info-label">Downloads</div>
+            </div>
+
+            <div class="info-divider" role="separator" aria-hidden="true"></div>
+
+            <div class="info-column">
+                <div class="info-value" id="version"></div>
+                <div class="info-label">Version</div>
+            </div>
+
+        </section>
+
+        <div class="install-wrap">
+
+            <button class="install-btn" id="installBtn">
+                Install
+            </button>
+
+        </div>
+
+        <section class="screenshot-section" aria-label="Application screenshots">
+
+            <div class="screenshot-scroll" id="screenshotScroll" tabindex="0" role="region" aria-label="Screenshot carousel. Use left/right arrow keys to scroll.">
+
+            </div>
+
+        </section>
+
+        <section class="ratings-section" id="ratingsSection" aria-label="App ratings">
+            <h2 class="ratings-title">Ratings</h2>
+            <div class="ratings-layout" id="ratingsLayout">
+                <div class="ratings-left" id="ratingsLeft">
+                    <div class="ratings-overall" id="ratingsOverall">—</div>
+                    <div class="ratings-stars" id="ratingsStars">☆☆☆☆☆</div>
+                    <div class="ratings-count" id="ratingsCount">—</div>
+                </div>
+                <div class="ratings-right" id="ratingsRight">
+                </div>
+            </div>
+
+            <div class="rating-submit-container" id="ratingSubmitContainer">
+                <div class="rating-submit-row">
+                    <div class="stars-container" id="starsContainer">
+                        <button class="star-btn" data-rating="1" aria-label="Rate 1 star">☆</button>
+                        <button class="star-btn" data-rating="2" aria-label="Rate 2 stars">☆</button>
+                        <button class="star-btn" data-rating="3" aria-label="Rate 3 stars">☆</button>
+                        <button class="star-btn" data-rating="4" aria-label="Rate 4 stars">☆</button>
+                        <button class="star-btn" data-rating="5" aria-label="Rate 5 stars">☆</button>
+                    </div>
+                    <button class="submit-rating-btn" id="submitRatingBtn" disabled>Submit</button>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="about-section">
+
+            <div class="about-header">
+
+                <h2 class="about-title">
+                    About this app
+                </h2>
+
+                <button class="about-button" id="aboutButton" aria-label="Show more information" aria-expanded="false">
+                    <img src="Back button.png" alt="" class="back-button-image">
+                </button>
+
+            </div>
+
+            <div class="about-description" id="aboutDescription">
+            </div>
+
+            <div class="data-safety-section" id="dataSafetySection">
+                <h2 class="data-safety-title">Data safety</h2>
+                <p class="data-safety-description" id="dataSafetyDescription">
+                </p>
+            </div>
+
+            <div class="about-detail" id="aboutDetail">
+
+                <div class="about-content" id="aboutContent">
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <div id="contentErrorContainer"></div>
+
+    </div>
+
+    <div class="screenshot-viewer" id="screenshotViewer" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+        <button class="screenshot-viewer-back" id="screenshotViewerBack" aria-label="Close screenshot viewer">
+            <img src="Back button.png" alt="" class="back-button-image">
+        </button>
+        <div class="screenshot-viewer-track" id="screenshotViewerTrack">
+        </div>
+    </div>
+
+    <script type="module">
+        // ----------------------------------------------
+        // All existing Firebase, Firestore, logic, etc.
+        // Completely unchanged except for fallback images.
+        // ----------------------------------------------
+
+        import { initializeApp } from 'firebase/app';
+        import { getFirestore, doc, getDoc, updateDoc, increment, runTransaction } from 'firebase/firestore';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDX4L1S3pZtFAoY28HDhCwv8Jp0BMrddb4",
+            authDomain: "app-deta-9107e.firebaseapp.com",
+            databaseURL: "https://app-deta-9107e-default-rtdb.firebaseio.com",
+            projectId: "app-deta-9107e",
+            storageBucket: "app-deta-9107e.firebasestorage.app",
+            messagingSenderId: "296341180391",
+            appId: "1:296341180391:web:685b22b3123f60b1eb3742",
+            measurementId: "G-3EDVBFD5J6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --------------------- FALLBACK CONSTANTS ---------------------
+        const FALLBACK_LOGO = 'logo.jpg';
+        const FALLBACK_SCREENSHOT = 'screen.jpg';
+
+        // --------------------- EXISTING LOGIC (unchanged) ---------------------
+        const STATIC_FEATURES = [
+            "Mobile-friendly application interface",
+            "Fast and responsive experience",
+            "Simple and clean user interface",
+            "Touch-friendly controls",
+            "Public image URL loading test"
+        ];
+
+        const STATIC_PRIVACY = "This is demo content for the application details page. Replace this section with your actual privacy and safety information.";
+
+        const $ = (id) => document.getElementById(id);
+
+        const dom = {
+            appName: $('appName'),
+            category: $('category'),
+            rating: $('rating'),
+            reviews: $('reviews'),
+            appSize: $('appSize'),
+            downloads: $('downloads'),
+            version: $('version'),
+            appIconImage: $('appIconImage'),
+            appIcon: $('appIcon'),
+            screenshotScroll: $('screenshotScroll'),
+            screenshotViewer: $('screenshotViewer'),
+            screenshotViewerTrack: $('screenshotViewerTrack'),
+            screenshotViewerBack: $('screenshotViewerBack'),
+            ratingsOverall: $('ratingsOverall'),
+            ratingsStars: $('ratingsStars'),
+            ratingsCount: $('ratingsCount'),
+            ratingsRight: $('ratingsRight'),
+            aboutDescription: $('aboutDescription'),
+            dataSafetyDescription: $('dataSafetyDescription'),
+            aboutContent: $('aboutContent'),
+            aboutDetail: $('aboutDetail'),
+            aboutButton: $('aboutButton'),
+            installBtn: $('installBtn'),
+            ratingSubmitContainer: $('ratingSubmitContainer'),
+            starsContainer: $('starsContainer'),
+            submitRatingBtn: $('submitRatingBtn'),
+            backBtn: $('backBtn'),
+            bookmarkBtn: $('bookmarkBtn'),
+            bookmarkIcon: $('bookmarkIcon'),
+            menuBtn: $('menuBtn'),
+            dropdown: $('dropdown'),
+            toast: $('toast'),
+            contentErrorContainer: $('contentErrorContainer'),
+        };
+
+        let currentDocumentId = null;
+
+        function getRatedApps() {
+            try {
+                const raw = localStorage.getItem('Rated_apps');
+                if (raw === null) return { apps: [] };
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.apps)) return { apps: [] };
+                return { apps: parsed.apps };
+            } catch (_) {
+                return { apps: [] };
+            }
+        }
+
+        function saveRatedApps(appsArray) {
+            if (!Array.isArray(appsArray)) appsArray = [];
+            localStorage.setItem('Rated_apps', JSON.stringify({ apps: appsArray }));
+        }
+
+        function hasUserRatedApp(documentId) {
+            if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') return false;
+            const trimmed = documentId.trim();
+            const rated = getRatedApps();
+            return rated.apps.includes(trimmed);
+        }
+
+        function markAppAsRated(documentId) {
+            if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') return;
+            const trimmed = documentId.trim();
+            const rated = getRatedApps();
+            if (!rated.apps.includes(trimmed)) {
+                rated.apps.push(trimmed);
+                saveRatedApps(rated.apps);
+            }
+        }
+
+        function getDownloadedApps() {
+            try {
+                const raw = localStorage.getItem('Downloaded_apps');
+                if (raw === null) return { apps: [] };
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.apps)) return { apps: [] };
+                return { apps: parsed.apps };
+            } catch (_) {
+                return { apps: [] };
+            }
+        }
+
+        function saveDownloadedApps(appsArray) {
+            if (!Array.isArray(appsArray)) appsArray = [];
+            localStorage.setItem('Downloaded_apps', JSON.stringify({ apps: appsArray }));
+        }
+
+        function hasUserDownloadedApp(documentId) {
+            if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') return false;
+            const trimmed = documentId.trim();
+            const downloaded = getDownloadedApps();
+            return downloaded.apps.includes(trimmed);
+        }
+
+        function markAppAsDownloaded(documentId) {
+            if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') return;
+            const trimmed = documentId.trim();
+            const downloaded = getDownloadedApps();
+            if (!downloaded.apps.includes(trimmed)) {
+                downloaded.apps.push(trimmed);
+                saveDownloadedApps(downloaded.apps);
+            }
+        }
+
+        let toastTimeout = null;
+
+        function showToast(message) {
+            const toast = dom.toast;
+            if (!toast) return;
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+            toast.textContent = message || 'Link copied.';
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+                toastTimeout = null;
+            }, 2500);
+        }
+
+        function getSavedApps() {
+            try {
+                const raw = localStorage.getItem('Save_apps');
+                if (raw === null) return { apps: [] };
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.apps)) return { apps: [] };
+                return { apps: parsed.apps };
+            } catch (_) {
+                return { apps: [] };
+            }
+        }
+
+        function saveSavedApps(appsArray) {
+            if (!Array.isArray(appsArray)) appsArray = [];
+            localStorage.setItem('Save_apps', JSON.stringify({ apps: appsArray }));
+        }
+
+        function isAppSaved(documentId) {
+            if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') return false;
+            const trimmed = documentId.trim();
+            const saved = getSavedApps();
+            return saved.apps.includes(trimmed);
+        }
+
+        function setBookmarkState(isSaved) {
+            dom.bookmarkIcon.classList.toggle('saved', isSaved);
+            dom.bookmarkBtn.setAttribute('aria-label', isSaved ? 'Remove app from saved' : 'Save app');
+        }
+
+        function restoreBookmarkState() {
+            if (!currentDocumentId || typeof currentDocumentId !== 'string' || currentDocumentId.trim() === '') {
+                setBookmarkState(false);
+                return;
+            }
+            setBookmarkState(isAppSaved(currentDocumentId));
+        }
+
+        function toggleSaveApp() {
+            const docId = currentDocumentId;
+            if (!docId || typeof docId !== 'string' || docId.trim() === '') return;
+            const trimmed = docId.trim();
+            const saved = getSavedApps();
+            const index = saved.apps.indexOf(trimmed);
+            if (index === -1) {
+                saved.apps.push(trimmed);
+                saveSavedApps(saved.apps);
+                setBookmarkState(true);
+            } else {
+                saved.apps.splice(index, 1);
+                saveSavedApps(saved.apps);
+                setBookmarkState(false);
+            }
+        }
+
+        function createImagePlaceholder(text) {
+            const div = document.createElement("div");
+            div.className = "image-placeholder";
+            div.textContent = text;
+            return div;
+        }
+
+        function safeStr(val) { return (val !== undefined && val !== null) ? String(val) : ""; }
+
+        function safeNum(val) {
+            const n = Number(val);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function safeArr(val) { return Array.isArray(val) ? val : []; }
+
+        function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) return "0";
+            const n = Number(num);
+            if (!isFinite(n)) return "0";
+            if (n >= 1e7) return (n / 1e7).toFixed(1) + "Cr+";
+            if (n >= 1e5) return (n / 1e5).toFixed(1) + "L+";
+            if (n >= 1e3) return (n / 1e3).toFixed(1) + "K+";
+            return String(n);
+        }
+
+        function formatRating(rating) {
+            const r = safeNum(rating);
+            return r.toFixed(1) + " ★";
+        }
+
+        function getStars(rating) {
+            const r = Math.round(safeNum(rating));
+            const filled = Math.min(Math.max(r, 0), 5);
+            return "★".repeat(filled) + "☆".repeat(5 - filled);
+        }
+
+        let currentAppData = null;
+        let screenshotUrls = [];
+
+        // ============================================================
+        // UPDATED: renderAppHeader with logo fallback
+        // ============================================================
+        function renderAppHeader(data) {
+            const name = safeStr(data.appName);
+            const cat = safeStr(data.category);
+            dom.appName.textContent = name || "Untitled App";
+            dom.category.textContent = cat || "Uncategorized";
+
+            const iconUrl = safeStr(data.logoUrl);
+            const img = dom.appIconImage;
+            const container = dom.appIcon;
+
+            const existingPlaceholder = container.querySelector('.app-icon-placeholder');
+            if (existingPlaceholder) existingPlaceholder.remove();
+
+            img.style.display = '';
+
+            if (iconUrl) {
+                img.src = iconUrl;
+                img.alt = name + " app icon";
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = FALLBACK_LOGO;
+                };
+                // Also handle case where fallback fails
+                const fallbackHandler = function() {
+                    this.onerror = null;
+                    this.style.display = 'none';
+                    const ph = document.createElement('div');
+                    ph.className = 'app-icon-placeholder';
+                    ph.textContent = 'Image unavailable';
+                    container.appendChild(ph);
+                };
+                // Store original onerror to chain
+                const origError = img.onerror;
+                img.onerror = function() {
+                    origError.call(this);
+                    // If after fallback it still fails, show placeholder
+                    this.onerror = function() {
+                        this.onerror = null;
+                        this.style.display = 'none';
+                        const ph = document.createElement('div');
+                        ph.className = 'app-icon-placeholder';
+                        ph.textContent = 'Image unavailable';
+                        container.appendChild(ph);
+                    };
+                };
+            } else {
+                // No logoUrl → directly use fallback
+                img.src = FALLBACK_LOGO;
+                img.alt = name + " app icon";
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.style.display = 'none';
+                    const ph = document.createElement('div');
+                    ph.className = 'app-icon-placeholder';
+                    ph.textContent = 'Image unavailable';
+                    container.appendChild(ph);
+                };
+            }
+        }
+
+        // ============================================================
+        // UPDATED: renderScreenshots with screenshot fallback
+        // ============================================================
+        function renderScreenshots(urls) {
+            const scroll = dom.screenshotScroll;
+            const viewerTrack = dom.screenshotViewerTrack;
+            const appName = safeStr(currentAppData?.appName) || "App";
+
+            scroll.innerHTML = '';
+            viewerTrack.innerHTML = '';
+
+            const list = safeArr(urls);
+            screenshotUrls = list;
+
+            if (list.length === 0) {
+                const msg = document.createElement('div');
+                msg.style.cssText =
+                    'padding:20px 0;color:#70757a;font-size:14px;text-align:center;width:100%;';
+                msg.textContent = 'No screenshots available';
+                scroll.appendChild(msg);
+                return;
+            }
+
+            list.forEach((url, idx) => {
+                const card = document.createElement("div");
+                card.className = "screenshot-card";
+                const img = document.createElement("img");
+                img.src = url;
+                img.alt = appName + " screenshot " + (idx + 1);
+                img.loading = idx === 0 ? "eager" : "lazy";
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = FALLBACK_SCREENSHOT;
+                    // If fallback also fails
+                    this.onerror = function() {
+                        this.onerror = null;
+                        this.remove();
+                        card.appendChild(createImagePlaceholder("Image unavailable"));
+                    };
+                };
+                card.appendChild(img);
+                card.addEventListener('click', () => openScreenshotViewer(idx));
+                scroll.appendChild(card);
+            });
+
+            list.forEach((url) => {
+                const slide = document.createElement('div');
+                slide.className = 'screenshot-viewer-slide';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Screenshot';
+                img.loading = 'lazy';
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = FALLBACK_SCREENSHOT;
+                    this.onerror = function() {
+                        this.onerror = null;
+                        this.alt = 'Image unavailable';
+                    };
+                };
+                slide.appendChild(img);
+                viewerTrack.appendChild(slide);
+            });
+        }
+
+        function renderRatings(data) {
+            const ratingVal = safeNum(data.rating);
+            dom.ratingsOverall.textContent = ratingVal > 0 ? ratingVal.toFixed(1) : "—";
+            dom.ratingsStars.textContent = ratingVal > 0 ? getStars(ratingVal) : "☆☆☆☆☆";
+
+            const reviews = safeNum(data.reviewCount);
+            dom.ratingsCount.textContent = reviews > 0 ? formatNumber(reviews) : "No reviews";
+
+            const starCounts = {
+                1: safeNum(data.star1),
+                2: safeNum(data.star2),
+                3: safeNum(data.star3),
+                4: safeNum(data.star4),
+                5: safeNum(data.star5)
+            };
+
+            const levels = [5, 4, 3, 2, 1];
+            const values = levels.map(l => starCounts[l]);
+            const maxVal = Math.max(...values, 1);
+
+            const right = dom.ratingsRight;
+            right.innerHTML = '';
+
+            levels.forEach((level) => {
+                const val = starCounts[level] || 0;
+                const pct = Math.round((val / maxVal) * 100);
+
+                const row = document.createElement("div");
+                row.className = "rating-row";
+
+                const label = document.createElement("span");
+                label.className = "rating-label";
+                label.textContent = level;
+                row.appendChild(label);
+
+                const track = document.createElement("div");
+                track.className = "rating-bar-track";
+                const fill = document.createElement("div");
+                fill.className = "rating-bar-fill";
+                fill.style.width = pct + "%";
+                fill.setAttribute("data-value", val);
+                track.appendChild(fill);
+                row.appendChild(track);
+                right.appendChild(row);
+            });
+        }
+
+        function renderAbout(data) {
+            const releaseNotes = safeStr(data.releaseNotes);
+            dom.aboutDescription.textContent = releaseNotes || "No description available.";
+
+            const safety = safeStr(data.dataSafety);
+            dom.dataSafetyDescription.textContent = safety || "No data safety information provided.";
+
+            const content = dom.aboutContent;
+            const permissions = safeStr(data.permissions);
+            const version = safeStr(data.version);
+            const category = safeStr(data.category);
+
+            let html = '';
+
+            html += `<h3>Description</h3><p>${releaseNotes || "No description available."}</p>`;
+
+            if (permissions) {
+                html += `<h3>Permissions</h3><p>${permissions}</p>`;
+            }
+
+            html += `<h3>Key Features</h3><ul>`;
+            STATIC_FEATURES.forEach(f => { html += `<li>${f}</li>`; });
+            html += `</ul>`;
+
+            html += `<h3>Privacy & Safety</h3><p>${STATIC_PRIVACY}</p>`;
+
+            html += `<div class="meta">`;
+            html += `<span><strong>Version:</strong> ${version || "—"}</span>`;
+            html += `<span><strong>Category:</strong> ${category || "—"}</span>`;
+            html += `</div>`;
+
+            content.innerHTML = html;
+        }
+
+        let isViewerOpen = false;
+        let previousOverflow = '';
+
+        function openScreenshotViewer(index) {
+            if (isViewerOpen) return;
+            if (screenshotUrls.length === 0) return;
+            isViewerOpen = true;
+
+            const safeIndex = Math.max(0, Math.min(index, screenshotUrls.length - 1));
+            previousOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            dom.screenshotViewer.classList.add('open');
+            const slideWidth = window.innerWidth;
+            dom.screenshotViewerTrack.scrollTo({
+                left: safeIndex * slideWidth,
+                behavior: 'instant'
+            });
+
+            void dom.screenshotViewerBack.offsetWidth;
+            dom.screenshotViewerBack.classList.add('visible');
+        }
+
+        function closeScreenshotViewer() {
+            if (!isViewerOpen) return;
+            isViewerOpen = false;
+            dom.screenshotViewerBack.classList.remove('visible');
+            dom.screenshotViewer.classList.remove('open');
+            document.body.style.overflow = previousOverflow;
+        }
+
+        dom.screenshotViewerBack.addEventListener('click', closeScreenshotViewer);
+        document.addEventListener('keydown', (e) => {
+            if (!isViewerOpen) return;
+            if (e.key === 'Escape') { closeScreenshotViewer();
+                e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { dom.screenshotViewerTrack.scrollBy({ left: -window.innerWidth,
+                    behavior: 'smooth' });
+                e.preventDefault(); }
+            if (e.key === 'ArrowRight') { dom.screenshotViewerTrack.scrollBy({ left: window.innerWidth,
+                    behavior: 'smooth' });
+                e.preventDefault(); }
+        });
+
+        dom.screenshotScroll.addEventListener("keydown", (event) => {
+            const firstCard = dom.screenshotScroll.querySelector(".screenshot-card");
+            if (!firstCard) return;
+            const distance = firstCard.offsetWidth + 12;
+            if (event.key === "ArrowRight") { event.preventDefault();
+                dom.screenshotScroll.scrollBy({ left: distance, behavior: "smooth" }); }
+            if (event.key === "ArrowLeft") { event.preventDefault();
+                dom.screenshotScroll.scrollBy({ left: -distance, behavior: "smooth" }); }
+        });
+
+        let selectedRating = 0;
+        const starBtns = dom.starsContainer?.querySelectorAll('.star-btn') || [];
+
+        function updateStars() {
+            starBtns.forEach((btn, idx) => {
+                const rating = idx + 1;
+                if (rating <= selectedRating) {
+                    btn.textContent = '★';
+                    btn.classList.add('active');
+                } else {
+                    btn.textContent = '☆';
+                    btn.classList.remove('active');
+                }
+            });
+            if (dom.submitRatingBtn) {
+                dom.submitRatingBtn.disabled = (selectedRating === 0);
+            }
+        }
+
+        function hideRatingSubmit() {
+            if (dom.ratingSubmitContainer) {
+                dom.ratingSubmitContainer.classList.remove('visible');
+            }
+            selectedRating = 0;
+            updateStars();
+        }
+
+        function showRatingSubmit() {
+            if (currentDocumentId && hasUserRatedApp(currentDocumentId)) {
+                if (dom.ratingSubmitContainer) {
+                    dom.ratingSubmitContainer.classList.remove('visible');
+                }
+                return;
+            }
+
+            if (dom.ratingSubmitContainer) {
+                dom.ratingSubmitContainer.classList.add('visible');
+                selectedRating = 0;
+                updateStars();
+            }
+        }
+
+        starBtns.forEach((btn) => {
+            btn.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'), 10);
+                if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+                    selectedRating = rating;
+                    updateStars();
+                }
+            });
+        });
+
+        if (dom.submitRatingBtn) {
+            dom.submitRatingBtn.addEventListener('click', async function() {
+                if (selectedRating === 0) return;
+                if (!currentDocumentId) {
+                    showModal('Error', 'No app document ID found.');
+                    return;
+                }
+
+                const docRef = doc(db, 'store', currentDocumentId);
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const snap = await transaction.get(docRef);
+                        if (!snap.exists()) {
+                            throw new Error('Document does not exist!');
+                        }
+
+                        const data = snap.data();
+                        const oldStar1 = safeNum(data.star1);
+                        const oldStar2 = safeNum(data.star2);
+                        const oldStar3 = safeNum(data.star3);
+                        const oldStar4 = safeNum(data.star4);
+                        const oldStar5 = safeNum(data.star5);
+                        const oldReviewCount = safeNum(data.reviewCount);
+                        const oldAvg = safeNum(data.rating);
+
+                        let newStar1 = oldStar1,
+                            newStar2 = oldStar2,
+                            newStar3 = oldStar3,
+                            newStar4 = oldStar4,
+                            newStar5 = oldStar5;
+                        switch (selectedRating) {
+                            case 1:
+                                newStar1 = oldStar1 + 1;
+                                break;
+                            case 2:
+                                newStar2 = oldStar2 + 1;
+                                break;
+                            case 3:
+                                newStar3 = oldStar3 + 1;
+                                break;
+                            case 4:
+                                newStar4 = oldStar4 + 1;
+                                break;
+                            case 5:
+                                newStar5 = oldStar5 + 1;
+                                break;
+                        }
+
+                        const newReviewCount = oldReviewCount + 1;
+                        const newAvg = ((oldAvg * oldReviewCount) + selectedRating) / newReviewCount;
+                        const newAvgRounded = parseFloat(newAvg.toFixed(1));
+
+                        transaction.update(docRef, {
+                            star1: newStar1,
+                            star2: newStar2,
+                            star3: newStar3,
+                            star4: newStar4,
+                            star5: newStar5,
+                            reviewCount: newReviewCount,
+                            rating: newAvgRounded
+                        });
+                    });
+
+                    markAppAsRated(currentDocumentId);
+
+                    if (currentAppData) {
+                        switch (selectedRating) {
+                            case 1:
+                                currentAppData.star1 = (currentAppData.star1 || 0) + 1;
+                                break;
+                            case 2:
+                                currentAppData.star2 = (currentAppData.star2 || 0) + 1;
+                                break;
+                            case 3:
+                                currentAppData.star3 = (currentAppData.star3 || 0) + 1;
+                                break;
+                            case 4:
+                                currentAppData.star4 = (currentAppData.star4 || 0) + 1;
+                                break;
+                            case 5:
+                                currentAppData.star5 = (currentAppData.star5 || 0) + 1;
+                                break;
+                        }
+                        const oldReviewCount = currentAppData.reviewCount || 0;
+                        const oldAvg = currentAppData.rating || 0;
+                        currentAppData.reviewCount = oldReviewCount + 1;
+                        const newAvg = ((oldAvg * oldReviewCount) + selectedRating) / (oldReviewCount + 1);
+                        currentAppData.rating = parseFloat(newAvg.toFixed(1));
+
+                        renderInfoRow(currentAppData);
+                        renderRatings(currentAppData);
+                    }
+
+                    if (dom.ratingSubmitContainer) {
+                        dom.ratingSubmitContainer.remove();
+                        dom.ratingSubmitContainer = null;
+                    }
+
+                } catch (error) {
+                    console.error('Transaction failed:', error);
+                    showModal('Error', 'Failed to submit rating. Please try again.');
+                }
+            });
+        }
+
+        let downloadInProgress = false;
+
+        function getFileNameFromUrl(url) {
+            try {
+                const u = new URL(url);
+                const path = u.pathname;
+                const parts = path.split('/');
+                const last = parts[parts.length - 1];
+                if (last && last.includes('.')) {
+                    return last;
+                }
+            } catch (_) { /* ignore */ }
+            return 'app.apk';
+        }
+
+        function showModal(title, message) {
+            const backdrop = document.createElement("div");
+            backdrop.className = "modal-backdrop";
+            const modal = document.createElement("div");
+            modal.className = "modal";
+            modal.innerHTML =
+                `<h3>${title}</h3><p>${message}</p><button type="button">OK</button>`;
+            backdrop.appendChild(modal);
+            document.body.appendChild(backdrop);
+            const close = () => backdrop.remove();
+            modal.querySelector("button").addEventListener("click", close);
+            backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+            const keyHandler = (e) => { if (e.key === "Escape") { close();
+                    document.removeEventListener("keydown", keyHandler); } };
+            document.addEventListener("keydown", keyHandler);
+            setTimeout(() => modal.querySelector("button").focus(), 30);
+        }
+
+        async function startSilentDownload() {
+            if (downloadInProgress) return;
+
+            const fileUrl = currentAppData?.appFileUrl;
+            if (!fileUrl || typeof fileUrl !== 'string' || fileUrl.trim() === '') {
+                showModal('Download unavailable', 'No app file URL is available for this app.');
+                return;
+            }
+
+            const trimmedUrl = fileUrl.trim();
+            try {
+                new URL(trimmedUrl);
+            } catch (_) {
+                showModal('Invalid URL', 'The app file URL appears to be invalid.');
+                return;
+            }
+
+            const docId = currentDocumentId;
+            const alreadyDownloaded = docId ? hasUserDownloadedApp(docId) : false;
+
+            downloadInProgress = true;
+            dom.installBtn.disabled = true;
+
+            try {
+                const response = await fetch(trimmedUrl);
+
+                if (!response.ok) {
+                    let msg = 'Download failed (HTTP ' + response.status + ').';
+                    if (response.status === 404) msg = 'File not found (404).';
+                    else if (response.status === 403) msg = 'Access denied (403).';
+                    else if (response.status === 500) msg = 'Server error (500).';
+                    throw new Error(msg);
+                }
+
+                const reader = response.body.getReader();
+                const chunks = [];
+
+                let done = false;
+                while (!done) {
+                    const { value, done: doneReading } = await reader.read();
+                    done = doneReading;
+                    if (value) {
+                        chunks.push(value);
+                    }
+                }
+
+                if (chunks.length === 0) {
+                    throw new Error('No data received from server.');
+                }
+
+                const blob = new Blob(chunks);
+
+                const fileName = getFileNameFromUrl(trimmedUrl);
+                const blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(blobUrl);
+                }, 5000);
+
+                if (!alreadyDownloaded && docId && docId.trim() !== '') {
+                    try {
+                        const docRef = doc(db, 'store', docId);
+                        await updateDoc(docRef, { downloads: increment(1) });
+
+                        if (currentAppData) {
+                            currentAppData.downloads = (currentAppData.downloads || 0) + 1;
+                            dom.downloads.textContent = formatNumber(currentAppData.downloads);
+                        }
+
+                        markAppAsDownloaded(docId);
+                    } catch (err) {
+                        console.warn('Failed to increment downloads in Firestore:', err);
+                    }
+                }
+
+                showRatingSubmit();
+
+            } catch (error) {
+                console.error('Download error:', error);
+                let msg = 'Download failed. Please try again.';
+                if (error.message) {
+                    if (error.message.includes('Failed to fetch')) {
+                        msg = 'Network error. Check your connection.';
+                    } else {
+                        msg = error.message;
+                    }
+                }
+                showModal('Download failed', msg);
+            } finally {
+                downloadInProgress = false;
+                dom.installBtn.disabled = false;
+            }
+        }
+
+        dom.installBtn.addEventListener('click', startSilentDownload);
+
+        dom.backBtn.addEventListener("click", () => { window.location.href = "index.html"; });
+
+        dom.bookmarkBtn.addEventListener("click", toggleSaveApp);
+
+        function getShareUrl() {
+            if (!currentDocumentId || typeof currentDocumentId !== 'string' || currentDocumentId.trim() === '') {
+                return null;
+            }
+            const docId = currentDocumentId.trim();
+            const baseUrl =
+                'https://superplaystore.github.io/1z/download_page.html?app=';
+            return baseUrl + encodeURIComponent(docId);
+        }
+
+        let menuOpen = false;
+        const closeMenu = () => { menuOpen = false;
+            dom.dropdown.classList.remove("open");
+            dom.menuBtn.setAttribute("aria-expanded", "false"); };
+        const openMenu = () => { menuOpen = true;
+            dom.dropdown.classList.add("open");
+            dom.menuBtn.setAttribute("aria-expanded", "true");
+            const first = dom.dropdown.querySelector("button");
+            if (first) setTimeout(() => first.focus(), 20); };
+
+        dom.menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            menuOpen ? closeMenu() : openMenu();
+        });
+        document.addEventListener("click", (e) => {
+            if (menuOpen && !dom.dropdown.contains(e.target) && !dom.menuBtn.contains(e.target)) closeMenu();
+        });
+
+        dom.dropdown.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+            const action = btn.dataset.action;
+
+            if (action === "share") {
+                const shareUrl = getShareUrl();
+                if (!shareUrl) {
+                    showToast('No app ID available');
+                    closeMenu();
+                    return;
+                }
+
+                if (!navigator.share) {
+                    showToast('Sharing is not available on this browser. Please use Copy link.');
+                    closeMenu();
+                    return;
+                }
+
+                const shareData = {
+                    title: currentAppData?.appName || "App",
+                    text: "Check out this app.",
+                    url: shareUrl,
+                };
+
+                try {
+                    await navigator.share(shareData);
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        console.error('Share failed:', error);
+                        showToast('Unable to share at this time.');
+                    }
+                }
+                closeMenu();
+                return;
+            }
+
+            if (action === "copy") {
+                const shareUrl = getShareUrl();
+                if (!shareUrl) {
+                    showToast('No app ID available');
+                    closeMenu();
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    showToast('Link copied.');
+                } catch (err) {
+                    console.warn('Clipboard write failed:', err);
+                    showToast('Unable to copy link.');
+                }
+                closeMenu();
+                return;
+            }
+
+            closeMenu();
+        });
+
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+        dom.dropdown.addEventListener("keydown", (e) => {
+            if (e.key === "Tab") {
+                const items = dom.dropdown.querySelectorAll("button");
+                const first = items[0],
+                    last = items[items.length - 1];
+                if (e.target === last && !e.shiftKey) setTimeout(closeMenu, 10);
+                if (e.target === first && e.shiftKey) setTimeout(closeMenu, 10);
+            }
+        });
+
+        dom.aboutButton.addEventListener("click", () => {
+            window.location.href = "app_information.html";
+        });
+
+        (function initMobileHeader() {
+            const topNav = document.querySelector(".top-nav");
+            const container = document.querySelector(".app-container");
+            if (!topNav || !container) return;
+            let lastScrollY = window.scrollY;
+            let headerOffset = 0;
+            let headerHeight = 0;
+            let isInitialized = false;
+            let ticking = false;
+            let animationFrame = null;
+
+            function getHeaderHeight() {
+                const rect = topNav.getBoundingClientRect();
+                return rect.height || 64;
+            }
+
+            function applyMobileStyles() {
+                topNav.classList.add("mobile-fixed");
+                topNav.style.transition = "none";
+                headerHeight = getHeaderHeight();
+                container.style.paddingTop = headerHeight + "px";
+                topNav.style.top = "0";
+                updateHeaderTransform(true);
+            }
+
+            function removeMobileStyles() {
+                topNav.classList.remove("mobile-fixed");
+                topNav.style.transform = "";
+                topNav.style.transition = "";
+                topNav.style.top = "";
+                container.style.paddingTop = "";
+                headerOffset = 0;
+                topNav.style.transform = "translate3d(0, 0, 0)";
+            }
+
+            function applyTransform() {
+                topNav.style.transform = "translate3d(0, " + headerOffset + "px, 0)";
+            }
+
+            function clampOffset() {
+                headerOffset = Math.max(-headerHeight, Math.min(0, headerOffset));
+            }
+
+            function updateHeaderTransform(force) {
+                const currentScrollY = window.scrollY;
+                if (currentScrollY <= 0) { headerOffset = 0;
+                    applyTransform();
+                    lastScrollY = currentScrollY; return; }
+                const delta = currentScrollY - lastScrollY;
+                headerOffset -= delta;
+                clampOffset();
+                applyTransform();
+                lastScrollY = currentScrollY;
+            }
+
+            function onScroll() {
+                if (!isInitialized) return;
+                if (!ticking) {
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    animationFrame = requestAnimationFrame(() => {
+                        updateHeaderTransform(false);
+                        ticking = false;
+                        animationFrame = null;
+                    });
+                    ticking = true;
+                }
+            }
+
+            function setupMobile() {
+                if (isInitialized) return;
+                isInitialized = true;
+                lastScrollY = window.scrollY;
+                headerOffset = 0;
+                applyMobileStyles();
+                const currentScroll = window.scrollY;
+                headerOffset = -Math.min(currentScroll, headerHeight);
+                clampOffset();
+                applyTransform();
+                lastScrollY = currentScroll;
+                window.addEventListener("scroll", onScroll, { passive: true });
+            }
+
+            function teardownMobile() {
+                if (!isInitialized) return;
+                isInitialized = false;
+                window.removeEventListener("scroll", onScroll);
+                if (animationFrame) { cancelAnimationFrame(animationFrame);
+                    animationFrame = null; }
+                ticking = false;
+                removeMobileStyles();
+            }
+
+            setupMobile();
+            let resizeTimeout = null;
+            window.addEventListener("resize", () => {
+                if (resizeTimeout) clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    if (isInitialized) {
+                        const newHeight = getHeaderHeight();
+                        if (newHeight !== headerHeight) {
+                            headerHeight = newHeight;
+                            container.style.paddingTop = headerHeight + "px";
+                            clampOffset();
+                            applyTransform();
+                        }
+                    }
+                    resizeTimeout = null;
+                }, 150);
+            });
+            window.addEventListener("orientationchange", () => {
+                setTimeout(() => {
+                    if (isInitialized) {
+                        const newHeight = getHeaderHeight();
+                        if (newHeight !== headerHeight) {
+                            headerHeight = newHeight;
+                            container.style.paddingTop = headerHeight + "px";
+                            clampOffset();
+                            applyTransform();
+                        }
+                    }
+                }, 300);
+            });
+        })();
+
+        function initAppIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appIdParam = urlParams.get('app');
+            if (appIdParam && typeof appIdParam === 'string') {
+                const trimmed = appIdParam.trim();
+                if (trimmed !== '') {
+                    let storedData = {};
+                    try {
+                        const raw = localStorage.getItem('App_id');
+                        if (raw) {
+                            storedData = JSON.parse(raw);
+                        }
+                    } catch (e) { /* ignore */ }
+                    if (!storedData || typeof storedData !== 'object') {
+                        storedData = {};
+                    }
+                    storedData["Document ID"] = trimmed;
+                    localStorage.setItem('App_id', JSON.stringify(storedData));
+                }
+            }
+        }
+
+        function showContentError(message, retryFn) {
+            dom.contentErrorContainer.innerHTML = '';
+
+            dom.appName.textContent = '';
+            dom.category.textContent = '';
+            dom.rating.textContent = '—';
+            dom.reviews.textContent = '';
+            dom.appSize.textContent = '—';
+            dom.downloads.textContent = '—';
+            dom.version.textContent = '—';
+
+            dom.screenshotScroll.innerHTML = '';
+
+            dom.ratingsOverall.textContent = '—';
+            dom.ratingsStars.textContent = '☆☆☆☆☆';
+            dom.ratingsCount.textContent = '—';
+            dom.ratingsRight.innerHTML = '';
+
+            dom.aboutDescription.textContent = '';
+            dom.dataSafetyDescription.textContent = '';
+            dom.aboutContent.innerHTML = '';
+
+            const container = dom.contentErrorContainer;
+            const div = document.createElement('div');
+            div.className = 'content-error';
+            div.innerHTML = `
+                <div class="error-icon">⚠️</div>
+                <div class="error-title">Unable to load</div>
+                <div class="error-message">${message || 'Something went wrong.'}</div>
+                ${typeof retryFn === 'function' ? `<button class="error-retry-btn">Try Again</button>` : ''}
+            `;
+            if (typeof retryFn === 'function') {
+                div.querySelector('.error-retry-btn').addEventListener('click', retryFn);
+            }
+            container.appendChild(div);
+
+            if (dom.ratingSubmitContainer) {
+                dom.ratingSubmitContainer.classList.remove('visible');
+            }
+        }
+
+        function clearContentError() {
+            dom.contentErrorContainer.innerHTML = '';
+        }
+
+        function renderInfoRow(data) {
+            const ratingVal = safeNum(data.rating);
+            dom.rating.textContent = formatRating(ratingVal);
+
+            const reviews = safeNum(data.reviewCount);
+            dom.reviews.textContent = (reviews > 0) ? formatNumber(reviews) + " reviews" : "No reviews";
+
+            dom.appSize.textContent = safeStr(data.appDataSize) || "—";
+            dom.downloads.textContent = (safeNum(data.downloads) > 0) ? formatNumber(data.downloads) : "—";
+            dom.version.textContent = safeStr(data.version) || "—";
+        }
+
+        // -------- NEW: hide page loader after everything is rendered --------
+        let pageLoading = true;
+        let loaderHidden = false;
+
+        function hidePageLoader() {
+            if (loaderHidden) return;
+            loaderHidden = true;
+            pageLoading = false;
+
+            const loader = document.getElementById('pageLoader');
+            if (!loader) return;
+
+            loader.classList.add('hidden');
+
+            setTimeout(() => {
+                if (loader.parentNode) {
+                    loader.remove();
+                }
+            }, 200);
+        }
+
+        // -------- UPDATED: loadAppData with loader control --------
+        async function loadAppData() {
+            clearContentError();
+
+            try {
+                const storedRaw = localStorage.getItem("App_id");
+                if (!storedRaw) {
+                    // Redirect case — loader stays visible until redirect completes
+                    window.location.replace("index.html");
+                    return;
+                }
+
+                let storedObj;
+                try {
+                    storedObj = JSON.parse(storedRaw);
+                } catch (parseErr) {
+                    showContentError(
+                        'Invalid app data. Please go back and try again.',
+                        () => { window.history.back(); }
+                    );
+                    hidePageLoader(); // hide loader so error is visible
+                    return;
+                }
+
+                const documentId = storedObj && storedObj["Document ID"];
+                if (!documentId || typeof documentId !== 'string' || documentId.trim() === '') {
+                    showContentError(
+                        'Missing document ID. Please go back and select an app.',
+                        () => { window.history.back(); }
+                    );
+                    hidePageLoader(); // hide loader so error is visible
+                    return;
+                }
+
+                const docId = documentId.trim();
+                currentDocumentId = docId;
+
+                const docRef = doc(db, 'store', docId);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    showContentError(
+                        'App not found. It may have been removed.',
+                        () => { window.location.reload(); }
+                    );
+                    hidePageLoader(); // hide loader so error is visible
+                    return;
+                }
+
+                const data = docSnap.data();
+
+                const appData = {
+                    appName: safeStr(data.appName),
+                    category: safeStr(data.category),
+                    permissions: safeStr(data.permissions),
+                    version: safeStr(data.version),
+                    releaseNotes: safeStr(data.releaseNotes),
+                    logoUrl: safeStr(data.logoUrl),
+                    screenshotUrls: safeArr(data.screenshotUrls),
+                    appFileUrl: safeStr(data.appFileUrl),
+                    dataSafety: safeStr(data.dataSafety),
+                    appDataSize: safeStr(data.appDataSize),
+                    downloads: safeNum(data.downloads),
+                    rating: safeNum(data.rating),
+                    reviewCount: safeNum(data.reviewCount),
+                    star1: safeNum(data.star1),
+                    star2: safeNum(data.star2),
+                    star3: safeNum(data.star3),
+                    star4: safeNum(data.star4),
+                    star5: safeNum(data.star5),
+                };
+
+                currentAppData = appData;
+
+                // ---- RENDER EVERYTHING ----
+                renderAppHeader(appData);
+                renderInfoRow(appData);
+                renderScreenshots(appData.screenshotUrls);
+                renderRatings(appData);
+                renderAbout(appData);
+
+                restoreBookmarkState();
+
+                if (currentDocumentId && hasUserRatedApp(currentDocumentId)) {
+                    if (dom.ratingSubmitContainer) {
+                        dom.ratingSubmitContainer.classList.remove('visible');
+                    }
+                }
+
+                downloadInProgress = false;
+                dom.installBtn.disabled = false;
+                dom.installBtn.textContent = 'Install';
+
+                // -------- ALL RENDERED — NOW HIDE LOADER --------
+                hidePageLoader();
+
+            } catch (error) {
+                console.error('Firebase/Firestore error:', error);
+                showContentError(
+                    'Network error. Please check your connection and try again.',
+                    () => { loadAppData(); }
+                );
+                hidePageLoader(); // hide loader so error is visible
+            }
+        }
+
+        initAppIdFromUrl();
+
+        loadAppData();
+
+        console.log('[Firestore] Using one-time getDoc() — no realtime listeners active.');
+        console.log('[Silent Download] Real APK downloader active.');
+    </script>
+</body>
+</html>
