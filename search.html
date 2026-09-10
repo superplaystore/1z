@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Search - Play Store</title>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f1f3f4;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --blue-600: #2563EB;
+            --accent-color: var(--blue-600);
+            --header-height: 60px;
+            --app-icon-size: clamp(90px, 18vw, 130px);
+            --grid-min-col: clamp(100px, 16vw, 140px);
+            --grid-gap-row: clamp(10px, 1.5vw, 18px);
+            --grid-gap-col: clamp(6px, 1vw, 14px);
+            --header-padding-x: clamp(8px, 2vw, 20px);
+            --main-padding-x: clamp(8px, 2vw, 24px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none !important;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: var(--primary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--header-padding-x);
+            z-index: 2000;
+            border-bottom: 1px solid var(--secondary-bg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            width: clamp(40px, 6vw, 48px);
+            height: clamp(40px, 6vw, 48px);
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .back-btn:active {
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+        .back-btn svg {
+            width: clamp(24px, 4vw, 30px);
+            height: clamp(24px, 4vw, 30px);
+            fill: var(--text-main);
+        }
+
+        .header-center {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 clamp(6px, 1.5vw, 16px);
+            min-width: 0;
+        }
+
+        .search-box-wrapper {
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+        }
+
+        /* === INVISIBLE SEARCH BOX — only text & placeholder remain visible === */
+        .search-box-wrapper input {
+            width: 100%;
+            height: clamp(36px, 6vw, 46px);
+            padding: 0 clamp(12px, 2vw, 18px);
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            /* ----- INVISIBLE BOX: no border, no background, no shadow ----- */
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+            /* preserve text & placeholder visibility */
+            color: var(--text-main);
+            -webkit-appearance: none;
+            /* keep layout dimensions */
+        }
+        /* ensure all states are equally invisible */
+        .search-box-wrapper input:focus {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .search-box-wrapper input::placeholder {
+            color: var(--text-sub);
+            opacity: 0.8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .search-submit-btn {
+            width: clamp(40px, 6vw, 48px);
+            height: clamp(40px, 6vw, 48px);
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-sub);
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .search-submit-btn:active {
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+        .search-submit-btn svg {
+            width: clamp(22px, 3.5vw, 28px);
+            height: clamp(22px, 3.5vw, 28px);
+            fill: var(--text-sub);
+            transition: fill 0.2s;
+        }
+        .search-submit-btn:hover svg {
+            fill: var(--accent-color);
+        }
+
+        main {
+            width: 100%;
+            padding: calc(var(--header-height) + clamp(12px, 2.5vw, 24px)) var(--main-padding-x) 40px var(--main-padding-x);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ----- FIXED: results container without vertical centering ----- */
+        .app-results-area {
+            position: relative;
+            width: 100%;
+            min-height: 360px;
+        }
+
+        /* Status message — centered absolutely inside the results area */
+        #searchStatus {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+            padding: 16px;
+            color: var(--text-sub);
+            font-size: 1rem;
+            pointer-events: none;        /* allow clicks to pass through if needed */
+            display: none;               /* hidden by default */
+        }
+        #searchStatus.visible {
+            display: block;
+        }
+
+        /* App grid — starts at the top of the results area */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-col), 1fr));
+            gap: var(--grid-gap-row) var(--grid-gap-col);
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        /* when no results, keep grid hidden (but container still has min-height) */
+        .app-grid:empty {
+            display: none;
+        }
+
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            height: fit-content;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            max-width: 100%;
+        }
+        .app-item:active {
+            opacity: 0.6;
+        }
+
+        .app-icon-large {
+            width: var(--app-icon-size);
+            height: var(--app-icon-size);
+            min-width: 110px;
+            min-height: 110px;
+            max-width: 130px;
+            max-height: 130px;
+            background-color: var(--secondary-bg);
+            border-radius: clamp(16px, 3vw, 26px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            border: 1px solid var(--text-sub);
+            overflow: hidden;
+            pointer-events: none;
+            aspect-ratio: 1/1;
+        }
+        .app-icon-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: clamp(16px, 3vw, 26px);
+            display: block;
+            pointer-events: none;
+        }
+
+        .app-name {
+            width: 100%;
+            max-width: var(--app-icon-size);
+            margin-top: 0;
+            font-size: clamp(0.75rem, 1.6vw, 1rem);
+            font-weight: 600;
+            line-height: 1.2;
+            text-align: left;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+            min-width: 0;
+        }
+
+        .app-rating {
+            width: 100%;
+            max-width: var(--app-icon-size);
+            margin-top: 2px;
+            font-size: clamp(0.65rem, 1.3vw, 0.85rem);
+            font-weight: 500;
+            line-height: 1.2;
+            text-align: left;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+            min-width: 0;
+        }
+
+        .loader-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 4px solid var(--secondary-bg);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 8px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="back-btn" id="backBtn" aria-label="Back">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="header-center">
+            <div class="search-box-wrapper">
+                <input
+                type="text"
+                id="searchInput"
+                placeholder="Search apps..."
+                enterkeyhint="search"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                />
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="search-submit-btn" id="searchBtn" aria-label="Search">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Unified results container: holds both status (centered) and grid -->
+        <div class="app-results-area">
+            <div id="searchStatus" class="visible">
+                <p style="color:var(--text-sub); font-size:1rem;">search apps</p>
+            </div>
+            <div class="app-grid" id="appGrid"></div>
+        </div>
+    </main>
+
+    <script type="module">
+        // ✅ NEW Firebase config (v12.18.0)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDX4L1S3pZtFAoY28HDhCwv8Jp0BMrddb4",
+            authDomain: "app-deta-9107e.firebaseapp.com",
+            databaseURL: "https://app-deta-9107e-default-rtdb.firebaseio.com",
+            projectId: "app-deta-9107e",
+            storageBucket: "app-deta-9107e.firebasestorage.app",
+            messagingSenderId: "296341180391",
+            appId: "1:296341180391:web:685b22b3123f60b1eb3742",
+            measurementId: "G-3EDVBFD5J6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --------------------- EXISTING LOGIC (unchanged) ---------------------
+        const FALLBACK_IMAGE =
+            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23cccccc"/%3E%3Ctext x="50" y="50" font-size="18" text-anchor="middle" dy=".3em" fill="%23666"%3E?%3C/text%3E%3C/svg%3E';
+
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const backBtn = document.getElementById('backBtn');
+        const appGrid = document.getElementById('appGrid');
+        const searchStatus = document.getElementById('searchStatus');
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function renderResults(apps, searchTerm) {
+            if (!apps || apps.length === 0) {
+                appGrid.innerHTML = '';
+                searchStatus.innerHTML = `<p style="color:var(--text-sub); font-size:1rem;">No apps found for "${escapeHtml(searchTerm)}"</p>`;
+                searchStatus.className = 'visible';
+                return;
+            }
+
+            searchStatus.className = 'hidden';
+
+            appGrid.innerHTML = apps.map(app => {
+                const rating = (app.rating !== undefined && app.rating !== null) ? Number(app.rating) : 0;
+                const ratingStr = rating.toFixed(1);
+                return `<div class="app-item" data-app-id="${escapeHtml(app.id)}">
+                            <div class="app-icon-large">
+                                <img src="${escapeHtml(app.icon || FALLBACK_IMAGE)}" alt="${escapeHtml(app.name)}" onerror="this.src='${FALLBACK_IMAGE}'" loading="lazy">
+                            </div>
+                            <div class="app-name">${escapeHtml(app.name)}</div>
+                            <div class="app-rating">★ ${escapeHtml(ratingStr)}</div>
+                        </div>`;
+            }).join('');
+
+            document.querySelectorAll('.app-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const appId = this.dataset.appId;
+                    if (!appId) return;
+                    const appIdData = { "Document ID": appId };
+                    localStorage.setItem("App_id", JSON.stringify(appIdData));
+                    window.location.href = 'download_page.html';
+                });
+            });
+        }
+
+        async function performSearch() {
+            const searchText = searchInput.value.trim();
+
+            if (!searchText) {
+                appGrid.innerHTML = '';
+                searchStatus.innerHTML = `<p style="color:var(--text-sub); font-size:1rem;">search apps</p>`;
+                searchStatus.className = 'visible';
+                return;
+            }
+
+            appGrid.innerHTML = '';
+            searchStatus.innerHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            <div class="loader-spinner"></div>
+                            <p style="color:var(--text-sub); font-size:1rem;">Searching…</p>
+                        </div>
+                    `;
+            searchStatus.className = 'visible';
+
+            try {
+                const q = query(
+                    collection(db, "store"),
+                    where("tags", "array-contains", searchText)
+                );
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    renderResults([], searchText);
+                    return;
+                }
+
+                const results = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.appName ? String(data.appName).trim() : "Unnamed App",
+                        icon: data.logoUrl ? String(data.logoUrl).trim() : FALLBACK_IMAGE,
+                        rating: data.rating !== undefined ? Number(data.rating) : 0
+                    };
+                });
+
+                renderResults(results, searchText);
+
+            } catch (error) {
+                appGrid.innerHTML = '';
+                searchStatus.innerHTML = `<p style="color:var(--text-sub); font-size:1rem;">Failed to search. Please try again.</p>`;
+                searchStatus.className = 'visible';
+            }
+        }
+
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        searchBtn.addEventListener('click', performSearch);
+
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        window.addEventListener('load', () => {
+            searchInput.focus();
+        });
+    </script>
+
+</body>
+</html>
